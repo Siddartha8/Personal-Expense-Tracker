@@ -18,7 +18,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
   if (isAdmin && !searchParams.viewUser) {
     const { getAdminUsers } = await import("@/actions/admin");
     const res = await getAdminUsers();
-    const users = res.users || [];
+    const users: any[] = (res.users as any[]) || [];
 
     return (
       <div className="space-y-8 pb-10">
