@@ -91,3 +91,22 @@ export async function deleteExpense(id: string) {
         return { error: "Failed to delete expense." };
     }
 }
+
+export async function updateExpense(id: string, data: { amount?: number; categoryId?: string; date?: Date; note?: string; paymentMethod?: string; location?: string }) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    try {
+        const expense = await db.expense.update({
+            where: { id, userId: session.user.id },
+            data,
+            include: { category: true }
+        });
+        revalidatePath("/");
+        revalidatePath("/reports");
+        revalidatePath("/analytics");
+        return { success: true, expense };
+    } catch (error) {
+        return { error: "Failed to securely update expense." };
+    }
+}
