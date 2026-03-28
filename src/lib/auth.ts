@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import db from "@/lib/db";
 import bcrypt from "bcryptjs";
@@ -13,6 +14,11 @@ export const authOptions: NextAuthOptions = {
         signIn: "/login",
     },
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID || "",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+            allowDangerousEmailAccountLinking: true,
+        }),
         CredentialsProvider({
             name: "credentials",
             credentials: {
@@ -39,6 +45,10 @@ export const authOptions: NextAuthOptions = {
 
                 if (!isCorrectPassword) {
                     throw new Error("Invalid credentials");
+                }
+
+                if (user.emailVerified === null) {
+                    throw new Error("Email unverified. Please check your inbox for an OTP or sign up again.");
                 }
 
                 return user;

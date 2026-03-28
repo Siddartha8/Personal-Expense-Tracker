@@ -2,6 +2,7 @@
 
 import db from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendVerificationEmail } from "@/lib/mail";
 
 export async function registerUser(formData: FormData) {
     try {
@@ -31,7 +32,19 @@ export async function registerUser(formData: FormData) {
             },
         });
 
-        return { success: true };
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        await db.verificationToken.create({
+            data: {
+                identifier: email,
+                token: otp,
+                expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes expiry
+            }
+        });
+        
+        await sendVerificationEmail(email, otp);
+
+        return { success: true, email };
     } catch (error: any) {
         console.error("REGISTER ERROR", error);
         return { error: error.message || "Something went wrong" };
@@ -59,5 +72,34 @@ export async function updateProfile(data: { name?: string; password?: string }) 
         return { success: true };
     } catch (err) {
         return { error: "Failed to update profile." };
+    }
+}
+
+export async function verifyOTP(email: string, otp: string) {
+    try {
+        const tokenRecord = await db.verificationToken.findUnique({
+            where: {
+                identifier_token: {
+                    identifier: email,
+                    token: otp
+                }
+            }
+        });
+
+        if (!tokenRecord) return { error: "Invalid verification code. It may be incorrect." };
+        if (new Date() > tokenRecord.expires) return { error: "Verification code has expired. Please register again." };
+
+        await db.user.update({
+            where: { email },
+            data: { emailVerified: new Date() }
+        });
+
+        await db.verificationToken.delete({
+            where: { identifier_token: { identifier: email, token: otp } }
+        });
+
+        return { success: true };
+    } catch(err: any) {
+        return { error: "Failed to securely verify email. Try again." };
     }
 }
