@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { motion } from "framer-motion";
 import { verifyOTP } from "@/actions/auth";
+import { signIn } from "next-auth/react";
 
 function VerifyForm() {
     const searchParams = useSearchParams();
@@ -30,7 +31,16 @@ function VerifyForm() {
         if (res.error) {
             setError(res.error);
         } else {
-            router.push(`/login?verified=true`);
+            const tempPass = sessionStorage.getItem("sid_temp_registration_pass");
+            if (tempPass) {
+                await signIn("credentials", {
+                    email,
+                    password: tempPass,
+                    redirect: false,
+                });
+                sessionStorage.removeItem("sid_temp_registration_pass");
+            }
+            router.push(`/`);
         }
     };
 

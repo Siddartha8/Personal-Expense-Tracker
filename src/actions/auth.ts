@@ -103,3 +103,32 @@ export async function verifyOTP(email: string, otp: string) {
         return { error: "Failed to securely verify email. Try again." };
     }
 }
+
+export async function deactivateOwnAccount() {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    try {
+        await db.user.update({
+            where: { id: session.user.id },
+            data: { isActive: false }
+        });
+        return { success: true };
+    } catch (err) {
+        return { error: "Critical error processing deactivation request." };
+    }
+}
+
+export async function deleteOwnAccount() {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    try {
+        await db.user.delete({
+            where: { id: session.user.id }
+        });
+        return { success: true };
+    } catch (err) {
+        return { error: "Critical error processing irreversible deletion." };
+    }
+}

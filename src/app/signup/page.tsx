@@ -34,6 +34,7 @@ export default function SignupPage() {
             setIsLoading(false);
             setIsLoading(false);
         } else {
+            sessionStorage.setItem("sid_temp_registration_pass", password);
             router.push(`/verify?email=${encodeURIComponent(email)}`);
         }
     };

@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, PlusCircle, PieChart, Layers, FileText, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, PlusCircle, PieChart, Layers, FileText, Settings, LogOut, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { Logo } from "./Logo";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -20,12 +20,16 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  
   const viewUser = searchParams?.get('viewUser');
   const query = viewUser ? `?viewUser=${viewUser}` : '';
 
+  const isAdmin = session?.user?.email === "admin";
+  
   const displayItems = viewUser
     ? navItems.filter(item => ["Dashboard", "Analytics", "Transactions"].includes(item.name))
-    : navItems;
+    : [...navItems, ...(isAdmin ? [{ name: "Admin Control", href: "/admin", icon: ShieldAlert }] : [])];
 
   return (
     <aside className="print:hidden fixed inset-y-0 left-0 z-40 w-64 border-r border-neutral-200 bg-white/50 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-950/50 hidden lg:flex flex-col">

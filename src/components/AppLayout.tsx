@@ -11,7 +11,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
 
-    const isAuthPage = pathname === "/login" || pathname === "/signup";
+    const isAuthPage = pathname === "/login" || pathname === "/signup" || pathname === "/verify";
 
     useEffect(() => {
         if (status !== "loading") {

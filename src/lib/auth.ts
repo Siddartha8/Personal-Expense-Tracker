@@ -51,11 +51,24 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Email unverified. Please check your inbox for an OTP or sign up again.");
                 }
 
+                if (user.isActive === false) {
+                    throw new Error("Your account has been deactivated. Please contact support.");
+                }
+
                 return user;
             }
         })
     ],
     callbacks: {
+        signIn: async ({ user, account }) => {
+            if (account?.provider === "google" && user?.email) {
+                const existingUser = await db.user.findUnique({ where: { email: user.email } });
+                if (existingUser && existingUser.isActive === false) {
+                    throw new Error("Your account has been deactivated. Please contact support.");
+                }
+            }
+            return true;
+        },
         session: ({ session, token }) => {
             if (token && session.user) {
                 session.user.id = token.sub as string;

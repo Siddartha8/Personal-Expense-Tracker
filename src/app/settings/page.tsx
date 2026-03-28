@@ -98,6 +98,48 @@ export default function SettingsPage() {
                     </div>
                 </form>
             </Card>
+
+            <Card className="p-6 max-w-2xl border-red-500/20 dark:border-red-500/10 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-[40px] -mr-10 -mt-10 pointer-events-none" />
+                <h3 className="font-bold text-lg mb-6 text-red-600 dark:text-red-500 relative z-10">Danger Zone</h3>
+                <div className="space-y-6 relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/20">
+                        <div>
+                            <p className="font-bold text-neutral-900 dark:text-white">Deactivate Account</p>
+                            <p className="text-sm text-neutral-500 max-w-sm mt-1">Temporarily block all access to your account. Your data remains fully encrypted and stored securely.</p>
+                        </div>
+                        <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20" 
+                            onClick={async () => {
+                                if(confirm("Are you certain you want to suspend your account? You will be immediately logged out.")) {
+                                    const { deactivateOwnAccount } = await import("@/actions/auth");
+                                    await deactivateOwnAccount();
+                                    window.location.href = "/login";
+                                }
+                            }}>
+                            Deactivate Account
+                        </Button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40">
+                        <div>
+                            <p className="font-bold text-red-600 dark:text-red-500">Permanently Delete Account</p>
+                            <p className="text-sm text-red-600/70 dark:text-red-400 max-w-md mt-1">Irreversibly obliterate your account and all associated transactional data vectors. This absolutely cannot be recovered.</p>
+                        </div>
+                        <Button className="bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20 select-none"
+                            onClick={async () => {
+                                if(confirm("CRITICAL WARNING: This will permanently eradicate your entire expense history and profile from our servers. Proceed?")) {
+                                    if(confirm("Are you absolutely sure? There is NO going back.")) {
+                                        const { deleteOwnAccount } = await import("@/actions/auth");
+                                        await deleteOwnAccount();
+                                        window.location.href = "/signup";
+                                    }
+                                }
+                            }}>
+                            Delete Everything
+                        </Button>
+                    </div>
+                </div>
+            </Card>
         </motion.div>
     );
 }
