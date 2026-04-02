@@ -1,12 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, PlusCircle, PieChart, Layers, FileText, Settings, LogOut, ShieldAlert, BadgeIndianRupee } from "lucide-react";
+import { LayoutDashboard, PlusCircle, PieChart, Layers, FileText, Settings, LogOut, ShieldAlert, BadgeIndianRupee, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { Logo } from "./Logo";
 import { signOut, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -22,7 +23,13 @@ export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
   
+  // Close sidebar on route change automatically for mobile UX
+  useEffect(() => {
+     setIsOpen(false);
+  }, [pathname]);
+
   const viewUser = searchParams?.get('viewUser');
   const query = viewUser ? `?viewUser=${viewUser}` : '';
 
@@ -33,8 +40,31 @@ export function Sidebar() {
     : [...navItems, ...(isAdmin ? [{ name: "Admin Control", href: "/admin", icon: ShieldAlert }] : [])];
 
   return (
-    <aside className="print:hidden fixed inset-y-0 left-0 z-40 w-64 border-r border-neutral-200 bg-white/50 backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-950/50 hidden lg:flex flex-col">
-      <div className="flex flex-col h-24 shrink-0 justify-center px-6 border-b border-neutral-200 dark:border-neutral-800">
+    <>
+      {/* Mobile Trigger Button */}
+      <div className="lg:hidden fixed bottom-6 right-6 z-50 print:hidden animate-in fade-in zoom-in duration-500">
+         <button 
+           onClick={() => setIsOpen(!isOpen)} 
+           className="w-14 h-14 flex items-center justify-center bg-blue-600 hover:bg-blue-700 active:scale-90 transition-all rounded-full shadow-2xl shadow-blue-500/50 text-white"
+         >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+         </button>
+      </div>
+
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-40 lg:hidden print:hidden transition-all animate-in fade-in" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Primary Sidebar Architecture */}
+      <aside className={cn(
+        "print:hidden fixed inset-y-0 left-0 z-50 w-72 border-r border-neutral-200 bg-white/95 backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-950/95 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0",
+        isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+      )}>
+        <div className="flex flex-col h-24 shrink-0 justify-center px-8 border-b border-neutral-200 dark:border-neutral-800">
         <Logo />
         <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mt-1 ml-1">Personal Expense Tracker</p>
       </div>
@@ -66,5 +96,6 @@ export function Sidebar() {
         <ThemeToggle />
       </div>
     </aside>
+    </>
   );
 }
