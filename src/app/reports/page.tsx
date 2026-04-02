@@ -165,7 +165,8 @@ function ReportsContent() {
             alternateRowStyles: { fillColor: [245, 247, 250] },
             didParseCell: function(data) {
                 if (data.section === 'body' && data.column.index === 5) { // Amount
-                    const isIncome = data.row.raw[1] === 'INCOME';
+                    const rawRow = data.row.raw as any[];
+                    const isIncome = rawRow[1] === 'INCOME';
                     if (isIncome) {
                         data.cell.styles.textColor = [16, 185, 129];
                         data.cell.styles.fontStyle = 'bold';
@@ -175,7 +176,8 @@ function ReportsContent() {
                     }
                 }
                 if (data.section === 'body' && data.column.index === 1) { // Type
-                    const isIncome = data.row.raw[1] === 'INCOME';
+                    const rawRow = data.row.raw as any[];
+                    const isIncome = rawRow[1] === 'INCOME';
                     if (isIncome) {
                         data.cell.styles.textColor = [16, 185, 129];
                         data.cell.styles.fontStyle = 'bold';
