@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, PlusCircle, PieChart, Layers, FileText, Settings, LogOut, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, PlusCircle, PieChart, Layers, FileText, Settings, LogOut, ShieldAlert, BadgeIndianRupee } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -11,9 +11,10 @@ import { signOut, useSession } from "next-auth/react";
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Add Expense", href: "/add", icon: PlusCircle },
+  { name: "Add Income", href: "/income", icon: BadgeIndianRupee },
   { name: "Analytics", href: "/analytics", icon: PieChart },
-  { name: "Categories", href: "/categories", icon: Layers },
   { name: "Transactions", href: "/reports", icon: FileText },
+  { name: "Categories", href: "/categories", icon: Layers },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

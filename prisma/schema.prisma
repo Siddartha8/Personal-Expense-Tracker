@@ -22,6 +22,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   expenses      Expense[]
+  incomes       Income[]
   categories    Category[]
 }
 
@@ -87,3 +88,16 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model Income {
+  id            String   @id @default(cuid())
+  amount        Float
+  date          DateTime
+  source        String?
+  paymentMethod String   @default("Cash")
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+

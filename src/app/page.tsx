@@ -1,7 +1,7 @@
 import { getDashboardStats } from "@/actions/expenses";
 import { MainExpenseChart, CategoryPieChart } from "@/components/DashboardCharts";
 import { Card } from "@/components/ui/Card";
-import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet2, TrendingUp, Users } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet2, TrendingUp, Users, BadgeIndianRupee } from "lucide-react";
 import { format, subDays } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -60,13 +60,14 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
     );
   }
 
-  const { todayTotal, recentExpenses, error } = await getDashboardStats(searchParams.viewUser);
+  const { todayTotal, recentExpenses, recentIncomes, balances, totalBalance, error } = await getDashboardStats(searchParams.viewUser);
 
   if (error) {
     return <div className="p-8 text-center text-red-500 font-medium bg-red-50 dark:bg-red-500/10 rounded-2xl">Failed to load dashboard data. Please make sure you are logged in.</div>;
   }
 
   const safeExpenses = recentExpenses || [];
+  const safeIncomes = recentIncomes || [];
 
   const categoryMap = new Map();
   safeExpenses.forEach((exp: any) => {
@@ -118,6 +119,33 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
           )}
         </div>
       </div>
+
+      <Card className="p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-800 text-white shadow-xl shadow-indigo-500/20">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-[80px] -ml-10 -mb-10 pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-6">
+          <div>
+            <p className="text-indigo-100 font-bold uppercase tracking-widest text-xs">Total Net Worth / Balance</p>
+            <h2 className="text-5xl sm:text-6xl font-black mt-2 tracking-tight">₹{(totalBalance || 0).toFixed(2)}</h2>
+            <p className="text-indigo-200 text-sm font-medium mt-2 max-w-sm">
+              Absolute available capital dynamically calculated from securely inputted ledger transactions.
+            </p>
+          </div>
+          <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/20 shadow-inner hidden sm:block">
+            <BadgeIndianRupee className="w-10 h-10 text-white" />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 relative z-10">
+          {["UPI", "Cash", "Card", "Net Banking"].map((wallet) => (
+            <div key={wallet} className="bg-black/20 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:bg-black/30 transition-colors">
+              <p className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1">{wallet}</p>
+              <p className="font-bold text-2xl truncate">₹{(balances?.[wallet] || 0).toFixed(2)}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
@@ -227,6 +255,54 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
                       </td>
                       <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-medium">{expense.note || <span className="opacity-40 italic">No note</span>}</td>
                       <td className="px-6 py-4 text-right font-bold text-neutral-900 dark:text-white">₹{expense.amount.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="text-xl font-bold mb-4 text-emerald-600 dark:text-emerald-500 tracking-tight">Recent Income (This Month)</h3>
+        <Card className="p-0 overflow-hidden border-emerald-500/20 dark:border-emerald-500/10 shadow-sm shadow-emerald-500/5">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="text-xs uppercase bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 font-bold tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Destination Wallet</th>
+                  <th className="px-6 py-4">Source</th>
+                  <th className="px-6 py-4 text-right">Amount (₹)</th>
+                  <th className="px-6 py-4 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {safeIncomes.length === 0 ? (
+                  <tr><td colSpan={5} className="px-6 py-6 text-center text-emerald-600/50 font-medium">No income logged this month.</td></tr>
+                ) : (
+                  safeIncomes.slice(0, 5).map((income: any) => (
+                    <tr key={income.id} className="border-b last:border-0 border-emerald-100/30 dark:border-emerald-900/30 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-colors group">
+                      <td className="px-6 py-4 font-medium text-emerald-950 dark:text-emerald-100">{format(new Date(income.date), 'MMM dd, yyyy')}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
+                          {income.paymentMethod}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-medium">{income.source || <span className="opacity-40 italic">Unknown Source</span>}</td>
+                      <td className="px-6 py-4 text-right font-black text-emerald-600 dark:text-emerald-400">+ ₹{income.amount.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-center">
+                        <form action={async () => {
+                          "use server";
+                          const { deleteIncome } = await import("@/actions/income");
+                          await deleteIncome(income.id);
+                        }}>
+                          <button type="submit" className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          </button>
+                        </form>
+                      </td>
                     </tr>
                   ))
                 )}
