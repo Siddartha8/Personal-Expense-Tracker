@@ -168,14 +168,16 @@ export async function reconcileWalletBalance(walletName: string, targetBalance: 
 
     try {
         const userId = session.user.id;
+        const now = new Date();
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         
         const expenseSum = await db.expense.aggregate({
-            where: { userId, paymentMethod: walletName },
+            where: { userId, paymentMethod: walletName, date: { gte: startOfLastMonth } },
             _sum: { amount: true }
         });
         
         const incomeSum = await db.income.aggregate({
-            where: { userId, paymentMethod: walletName },
+            where: { userId, paymentMethod: walletName, date: { gte: startOfLastMonth } },
             _sum: { amount: true }
         });
 
