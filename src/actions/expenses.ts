@@ -63,13 +63,13 @@ export async function getDashboardStats(targetUserId?: string) {
 
         const expenseSums = await db.expense.groupBy({
             by: ['paymentMethod'],
-            where: { userId: targetId, date: { gte: startOfLastMonth } },
+            where: { userId: targetId },
             _sum: { amount: true }
         });
 
         const incomeSums = await db.income.groupBy({
             by: ['paymentMethod'],
-            where: { userId: targetId, date: { gte: startOfLastMonth } },
+            where: { userId: targetId },
             _sum: { amount: true }
         });
 
@@ -172,12 +172,12 @@ export async function reconcileWalletBalance(walletName: string, targetBalance: 
         const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         
         const expenseSum = await db.expense.aggregate({
-            where: { userId, paymentMethod: walletName, date: { gte: startOfLastMonth } },
+            where: { userId, paymentMethod: walletName },
             _sum: { amount: true }
         });
         
         const incomeSum = await db.income.aggregate({
-            where: { userId, paymentMethod: walletName, date: { gte: startOfLastMonth } },
+            where: { userId, paymentMethod: walletName },
             _sum: { amount: true }
         });
 
