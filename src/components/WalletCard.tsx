@@ -27,7 +27,7 @@ export function WalletCard({ name, balance }: { name: string; balance: number })
       >
         <p className="text-indigo-200/80 text-[10px] font-black uppercase tracking-widest mb-1.5">{name}</p>
         <p className="font-bold text-2xl truncate drop-shadow-sm">₹{balance.toFixed(2)}</p>
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 p-1.5 rounded-md backdrop-blur-md">
+        <div className="absolute top-4 right-4 bg-white/10 p-1.5 rounded-md backdrop-blur-md shadow-sm border border-white/10 hover:bg-white/20 transition-colors">
           <Edit2 className="w-3.5 h-3.5 text-white" />
         </div>
       </div>
