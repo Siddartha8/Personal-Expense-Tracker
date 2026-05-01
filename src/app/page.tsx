@@ -5,6 +5,7 @@ import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet2, TrendingUp, Users, 
 import { format, subDays } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { WalletCard } from "@/components/WalletCard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -141,10 +142,11 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 relative z-10">
             {["UPI", "Cash", "Card", "Net Banking"].map((wallet) => (
-              <div key={wallet} className="bg-black/20 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:bg-black/30 hover:scale-[1.02] transition-all duration-300">
-                <p className="text-indigo-200/80 text-[10px] font-black uppercase tracking-widest mb-1.5">{wallet}</p>
-                <p className="font-bold text-2xl truncate drop-shadow-sm">₹{(balances?.[wallet] || 0).toFixed(2)}</p>
-              </div>
+              <WalletCard 
+                key={wallet} 
+                name={wallet} 
+                balance={balances?.[wallet] || 0} 
+              />
             ))}
           </div>
         </Card>

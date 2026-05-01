@@ -33,6 +33,7 @@ export async function getDashboardStats(targetUserId?: string) {
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
         const isAdmin = session.user.email === "admin";
         const targetId = (isAdmin && targetUserId) ? targetUserId : session.user.id;
@@ -62,13 +63,13 @@ export async function getDashboardStats(targetUserId?: string) {
 
         const expenseSums = await db.expense.groupBy({
             by: ['paymentMethod'],
-            where: { userId: targetId },
+            where: { userId: targetId, date: { gte: startOfLastMonth } },
             _sum: { amount: true }
         });
 
         const incomeSums = await db.income.groupBy({
             by: ['paymentMethod'],
-            where: { userId: targetId },
+            where: { userId: targetId, date: { gte: startOfLastMonth } },
             _sum: { amount: true }
         });
 
@@ -158,6 +159,69 @@ export async function deleteExpense(id: string) {
         return { success: true };
     } catch (error) {
         return { error: "Failed to delete expense." };
+    }
+}
+
+export async function reconcileWalletBalance(walletName: string, targetBalance: number) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    try {
+        const userId = session.user.id;
+        
+        const expenseSum = await db.expense.aggregate({
+            where: { userId, paymentMethod: walletName },
+            _sum: { amount: true }
+        });
+        
+        const incomeSum = await db.income.aggregate({
+            where: { userId, paymentMethod: walletName },
+            _sum: { amount: true }
+        });
+
+        const currentBalance = (incomeSum._sum.amount || 0) - (expenseSum._sum.amount || 0);
+        const difference = targetBalance - currentBalance;
+
+        if (difference > 0) {
+            await db.income.create({
+                data: {
+                    userId,
+                    amount: difference,
+                    paymentMethod: walletName,
+                    source: "System Balance Adjustment",
+                    date: new Date()
+                }
+            });
+        } else if (difference < 0) {
+            let adjCategory = await db.category.findFirst({
+                where: { userId, name: "Adjustment" }
+            });
+            if (!adjCategory) {
+                adjCategory = await db.category.create({
+                    data: {
+                        userId,
+                        name: "Adjustment",
+                        color: "#6b7280",
+                        icon: "Settings2"
+                    }
+                });
+            }
+            await db.expense.create({
+                data: {
+                    userId,
+                    amount: Math.abs(difference),
+                    paymentMethod: walletName,
+                    categoryId: adjCategory.id,
+                    note: "System Balance Adjustment",
+                    date: new Date()
+                }
+            });
+        }
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        return { error: "Failed to reconcile balance" };
     }
 }
 
