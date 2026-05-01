@@ -130,7 +130,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-6">
             <div>
               <p className="text-indigo-200/80 font-bold uppercase tracking-widest text-xs drop-shadow-sm">Total Net Worth / Balance</p>
-              <h2 className="text-5xl sm:text-6xl font-black mt-2 tracking-tight drop-shadow-md">₹{(totalBalance || 0).toFixed(2)}</h2>
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mt-2 tracking-tight drop-shadow-md">₹{(totalBalance || 0).toFixed(2)}</h2>
               <p className="text-indigo-200/90 text-sm font-medium mt-3 max-w-sm leading-relaxed">
                 Absolute available capital dynamically calculated from securely inputted ledger transactions.
               </p>
@@ -140,7 +140,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ vie
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10 relative z-10">
             {["UPI", "Cash", "Card", "Net Banking"].map((wallet) => (
               <WalletCard 
                 key={wallet} 

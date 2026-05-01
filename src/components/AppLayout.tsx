@@ -57,7 +57,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="print:hidden">
                 <Sidebar />
             </div>
-            <main className="flex-1 lg:pl-64 print:pl-0 print:block">
+            <main className="flex-1 lg:pl-72 print:pl-0 print:block">
                 <div className="mx-auto max-w-6xl p-4 sm:p-6 pb-28 lg:p-10 print:p-0">
                     <AnimatePresence mode="wait">
                         <motion.div
