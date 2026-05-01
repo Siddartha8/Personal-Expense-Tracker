@@ -62,13 +62,13 @@ export async function getDashboardStats(targetUserId?: string) {
 
         const expenseSums = await db.expense.groupBy({
             by: ['paymentMethod'],
-            where: { userId: targetId, date: { gte: startOfThisMonth } },
+            where: { userId: targetId },
             _sum: { amount: true }
         });
 
         const incomeSums = await db.income.groupBy({
             by: ['paymentMethod'],
-            where: { userId: targetId, date: { gte: startOfThisMonth } },
+            where: { userId: targetId },
             _sum: { amount: true }
         });
 
